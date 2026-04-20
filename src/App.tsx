@@ -225,6 +225,7 @@ export default function App() {
               onCopy={handleCopy}
               onCut={handleCut}
               onPaste={handlePaste}
+              onBatchImport={handleBatchImport}
               clipboard={clipboard}
             />
           )}

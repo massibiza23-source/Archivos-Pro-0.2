@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'motion/react';
-import { Share2, Edit2, Trash2, MoreHorizontal, FileText, Image as ImageIcon, Video, Music, Copy, Scissors } from 'lucide-react';
+import { Share2, Edit2, Trash2, MoreHorizontal, FileText, Image as ImageIcon, Video, Music, Copy, Scissors, Plus, Upload } from 'lucide-react';
 import { FileNode, FileType } from '../types';
 import { cn, formatSize, formatDate } from '../lib/utils';
 import { FileIcon } from '../components/FileIcon';
@@ -16,11 +16,13 @@ interface CategoryViewProps {
   onCopy: (nodes: FileNode[]) => void;
   onCut: (nodes: FileNode[]) => void;
   onPaste: (parentId: string | null) => void;
+  onBatchImport: (items: { type: 'file' | 'folder'; name: string; file?: File; path: string }[]) => void;
   clipboard: { nodes: FileNode[]; type: 'copy' | 'cut' } | null;
   key?: string;
 }
 
-export default function CategoryView({ type, files, onDelete, onRename, onCopy, onCut }: CategoryViewProps) {
+export default function CategoryView({ type, files, onDelete, onRename, onCopy, onCut, onBatchImport }: CategoryViewProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedNode, setSelectedNode] = useState<FileNode | null>(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [renameValue, setRenameValue] = useState('');
@@ -88,22 +90,46 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className="p-8"
+      className="p-8 pb-32"
     >
       <header className="mb-12 pt-10">
-        <div className={cn(
-          "w-16 h-16 rounded-[24px] flex items-center justify-center mb-6",
-          type === 'document' && "bg-blue-500/20 text-blue-400",
-          type === 'image' && "bg-purple-500/20 text-purple-400",
-          type === 'video' && "bg-amber-500/20 text-amber-400",
-          type === 'audio' && "bg-emerald-500/20 text-emerald-400",
-        )}>
-          <Icon size={32} />
+        <div className="flex items-center justify-between gap-4">
+          <div className={cn(
+            "w-16 h-16 rounded-[24px] flex items-center justify-center mb-6",
+            type === 'document' && "bg-blue-500/20 text-blue-400",
+            type === 'image' && "bg-purple-500/20 text-purple-400",
+            type === 'video' && "bg-amber-500/20 text-amber-400",
+            type === 'audio' && "bg-emerald-500/20 text-emerald-400",
+          )}>
+            <Icon size={32} />
+          </div>
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-3 rounded-2xl border border-white/10 transition-all active:scale-95 text-xs font-bold uppercase tracking-widest"
+          >
+            <Upload size={16} />
+            Importar {type === 'image' ? 'Imágenes' : 'Archivos'}
+          </button>
         </div>
         <h1 className="text-4xl font-bold capitalize text-white">
           {type === 'image' ? 'Imágenes' : type === 'document' ? 'Documentos' : type === 'audio' ? 'Audio' : type}
         </h1>
         <p className="text-slate-500 font-bold tracking-widest text-[11px] mt-2 uppercase">{items.length} ARCHIVOS TOTALES</p>
+        
+        <input 
+          type="file" 
+          multiple
+          accept={type === 'image' ? 'image/*' : type === 'video' ? 'video/*' : type === 'audio' ? 'audio/*' : undefined}
+          hidden 
+          ref={fileInputRef} 
+          onChange={(e) => {
+            const uploaded = Array.from(e.target.files || []) as File[];
+            if (uploaded.length > 0) {
+              onBatchImport(uploaded.map(f => ({ type: 'file', name: f.name, file: f, path: f.name })));
+            }
+            e.target.value = '';
+          }} 
+        />
       </header>
 
       {items.length === 0 ? (
