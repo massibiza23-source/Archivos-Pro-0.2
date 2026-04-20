@@ -167,7 +167,7 @@ export default function ExplorerView({
       className="flex flex-col min-h-full"
     >
       {/* Header & Breadcrumbs */}
-      <header className="px-8 pt-10 pb-6 sticky top-0 bg-slate-950/80 backdrop-blur-xl z-30">
+      <header className="px-8 pt-10 pb-6 sticky top-0 theme-header z-30">
         <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold tracking-[0.2em] uppercase mb-4 overflow-x-auto no-scrollbar whitespace-nowrap">
           <button onClick={() => onNavigate(null)} className="hover:text-blue-400 transition-colors">
             HOME
@@ -211,7 +211,8 @@ export default function ExplorerView({
             )}
             <button 
               onClick={() => setIsNewContentSheetOpen(true)}
-              className="bg-blue-600 hover:bg-blue-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20 pb-0.5 active:scale-95 transition-all"
+              className="text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg pb-0.5 active:scale-95 transition-all"
+              style={{ backgroundColor: 'var(--accent)' }}
             >
               <Plus size={24} />
             </button>

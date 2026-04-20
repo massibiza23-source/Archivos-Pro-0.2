@@ -17,16 +17,55 @@ interface CategoryViewProps {
   onCut: (nodes: FileNode[]) => void;
   onPaste: (parentId: string | null) => void;
   onBatchImport: (items: { type: 'file' | 'folder'; name: string; file?: File; path: string }[]) => void;
+  language: 'es' | 'en';
   clipboard: { nodes: FileNode[]; type: 'copy' | 'cut' } | null;
   key?: string;
 }
 
-export default function CategoryView({ type, files, onDelete, onRename, onCopy, onCut, onBatchImport }: CategoryViewProps) {
+export default function CategoryView({ type, files, onDelete, onRename, onCopy, onCut, onBatchImport, language }: CategoryViewProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedNode, setSelectedNode] = useState<FileNode | null>(null);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [renameValue, setRenameValue] = useState('');
   const [nodeToPreview, setNodeToPreview] = useState<FileNode | null>(null);
+
+  const t = (key: string) => {
+    const translations: Record<string, Record<string, string>> = {
+      es: {
+        document: 'Documentos',
+        image: 'Imágenes',
+        video: 'Vídeos',
+        audio: 'Audio',
+        totalFiles: 'ARCHIVOS TOTALES',
+        noFiles: 'No hay archivos aquí',
+        import: 'Importar',
+        share: 'Compartir Archivo',
+        copy: 'Copiar',
+        cut: 'Cortar (Mover)',
+        rename: 'Renombrar',
+        delete: 'Eliminar permanentemente',
+        save: 'GUARDAR CAMBIOS',
+        confirm: '¿Eliminar'
+      },
+      en: {
+        document: 'Documents',
+        image: 'Images',
+        video: 'Videos',
+        audio: 'Audio',
+        totalFiles: 'TOTAL FILES',
+        noFiles: 'No files here',
+        import: 'Import',
+        share: 'Share File',
+        copy: 'Copy',
+        cut: 'Cut (Move)',
+        rename: 'Rename',
+        delete: 'Delete permanently',
+        save: 'SAVE CHANGES',
+        confirm: 'Delete'
+      }
+    };
+    return translations[language][key] || key;
+  };
 
   const items = files.filter(f => f.type === type && !f.isFolder);
 
@@ -108,13 +147,13 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
             className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-3 rounded-2xl border border-white/10 transition-all active:scale-95 text-xs font-bold uppercase tracking-widest"
           >
             <Upload size={16} />
-            Importar {type === 'image' ? 'Imágenes' : 'Archivos'}
+            {t('import')} {type === 'image' ? t('image') : t('document')}
           </button>
         </div>
         <h1 className="text-4xl font-bold capitalize text-white">
-          {type === 'image' ? 'Imágenes' : type === 'document' ? 'Documentos' : type === 'audio' ? 'Audio' : type}
+          {t(type)}
         </h1>
-        <p className="text-slate-500 font-bold tracking-widest text-[11px] mt-2 uppercase">{items.length} ARCHIVOS TOTALES</p>
+        <p className="text-slate-500 font-bold tracking-widest text-[11px] mt-2 uppercase">{items.length} {t('totalFiles')}</p>
         
         <input 
           type="file" 
@@ -134,7 +173,7 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
 
       {items.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-slate-700 italic font-medium">
-          No hay archivos aquí
+          {t('noFiles')}
         </div>
       ) : (
         <div className="space-y-4">
@@ -180,7 +219,7 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
           <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
             <Share2 size={20} />
           </div>
-          Compartir Archivo
+          {t('share')}
         </button>
         <button 
           onClick={() => { onCopy([selectedNode!]); setSelectedNode(null); }}
@@ -189,7 +228,7 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
           <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
             <Copy size={20} />
           </div>
-          Copiar
+          {t('copy')}
         </button>
         <button 
           onClick={() => { onCut([selectedNode!]); setSelectedNode(null); }}
@@ -198,7 +237,7 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
           <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
             <Scissors size={20} />
           </div>
-          Cortar (Mover)
+          {t('cut')}
         </button>
         <button 
           onClick={() => handleRenamePrompt(selectedNode!)}
@@ -207,11 +246,11 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
           <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center">
             <Edit2 size={20} />
           </div>
-          Renombrar
+          {t('rename')}
         </button>
         <button 
           onClick={() => { 
-            if (confirm(`¿Eliminar ${selectedNode?.name}?`)) {
+            if (confirm(`${t('confirm')} ${selectedNode?.name}?`)) {
               onDelete(selectedNode!.id);
               setSelectedNode(null);
             }
@@ -221,20 +260,20 @@ export default function CategoryView({ type, files, onDelete, onRename, onCopy, 
           <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
             <Trash2 size={20} />
           </div>
-          Eliminar permanentemente
+          {t('delete')}
         </button>
       </BottomSheet>
 
       <Modal 
         isOpen={isRenameModalOpen} 
         onClose={() => setIsRenameModalOpen(false)} 
-        title="Renombrar"
+        title={t('rename')}
         footer={(
           <button 
             onClick={handleRenameSubmit}
             className="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
           >
-            GUARDAR CAMBIOS
+            {t('save')}
           </button>
         )}
       >

@@ -10,20 +10,61 @@ interface HomeViewProps {
   onNavigateCategory: (type: FileType) => void;
   onNavigateFolder: (id: string | null) => void;
   onCreateFolder: (name: string) => void;
+  language: 'es' | 'en';
   key?: string;
 }
 
-export default function HomeView({ files, onNavigateCategory, onNavigateFolder, onCreateFolder }: HomeViewProps) {
+export default function HomeView({ files, onNavigateCategory, onNavigateFolder, onCreateFolder, language }: HomeViewProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
+
+  const t = (key: string) => {
+    const translations: Record<string, Record<string, string>> = {
+      es: {
+        subtitle: 'Gestiona tu espacio privado de forma segura',
+        categories: 'Categorías',
+        folders: 'Mis Carpetas',
+        viewAll: 'VER TODO',
+        new: 'NUEVA',
+        items: 'ITEMS',
+        filesCount: 'ARCHIVOS',
+        createFolder: 'Crear Carpeta',
+        cancel: 'CANCELAR',
+        create: 'CREAR',
+        placeholder: 'Nombre de la carpeta...',
+        document: 'Documentos',
+        image: 'Imágenes',
+        video: 'Vídeos',
+        audio: 'Audio'
+      },
+      en: {
+        subtitle: 'Manage your private space securely',
+        categories: 'Categories',
+        folders: 'My Folders',
+        viewAll: 'VIEW ALL',
+        new: 'NEW',
+        items: 'ITEMS',
+        filesCount: 'FILES',
+        createFolder: 'Create Folder',
+        cancel: 'CANCELAR',
+        create: 'CREATE',
+        placeholder: 'Folder name...',
+        document: 'Documents',
+        image: 'Images',
+        video: 'Videos',
+        audio: 'Audio'
+      }
+    };
+    return translations[language][key] || key;
+  };
 
   const rootFolders = files.filter(f => f.isFolder && f.parentId === null);
   
   const categories = [
-    { id: 'document', name: 'Documentos', icon: FileText, color: 'text-blue-400', bgColor: 'bg-blue-500/20', count: files.filter(f => f.type === 'document').length },
-    { id: 'image', name: 'Imágenes', icon: ImageIcon, color: 'text-purple-400', bgColor: 'bg-purple-500/20', count: files.filter(f => f.type === 'image').length },
-    { id: 'video', name: 'Vídeos', icon: Video, color: 'text-amber-400', bgColor: 'bg-amber-500/20', count: files.filter(f => f.type === 'video').length },
-    { id: 'audio', name: 'Audio', icon: Music, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20', count: files.filter(f => f.type === 'audio').length },
+    { id: 'document', name: t('document'), icon: FileText, color: 'text-blue-400', bgColor: 'bg-blue-500/20', count: files.filter(f => f.type === 'document').length },
+    { id: 'image', name: t('image'), icon: ImageIcon, color: 'text-purple-400', bgColor: 'bg-purple-500/20', count: files.filter(f => f.type === 'image').length },
+    { id: 'video', name: t('video'), icon: Video, color: 'text-amber-400', bgColor: 'bg-amber-500/20', count: files.filter(f => f.type === 'video').length },
+    { id: 'audio', name: t('audio'), icon: Music, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20', count: files.filter(f => f.type === 'audio').length },
   ];
 
   const handleCreate = () => {
@@ -45,15 +86,18 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
       {/* Header */}
       <header className="pt-4">
         <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-          <span className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-lg shadow-lg shadow-blue-600/30">A</span>
+          <span 
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-lg"
+            style={{ backgroundColor: 'var(--accent)', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4)' }}
+          >A</span>
           ArchivoPro
         </h1>
-        <p className="text-slate-400 mt-2 text-sm">Gestiona tu espacio privado de forma segura</p>
+        <p className="text-slate-400 mt-2 text-sm">{t('subtitle')}</p>
       </header>
 
       {/* Categories Grid */}
       <section>
-        <h2 className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-6">Categorías</h2>
+        <h2 className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500 mb-6">{t('categories')}</h2>
         <div className="grid grid-cols-2 gap-5">
           {categories.map((cat) => (
             <button
@@ -66,7 +110,7 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
               </div>
               <div>
                 <h3 className="font-semibold text-base text-white">{cat.name}</h3>
-                <p className="text-slate-400 text-[11px] mt-1 uppercase tracking-wider font-medium">{cat.count} ARCHIVOS</p>
+                <p className="text-slate-400 text-[11px] mt-1 uppercase tracking-wider font-medium">{cat.count} {t('filesCount')}</p>
               </div>
             </button>
           ))}
@@ -76,12 +120,12 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
       {/* Folders Carousel */}
       <section>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">Mis Carpetas</h2>
+          <h2 className="text-[11px] uppercase tracking-[0.2em] font-bold text-slate-500">{t('folders')}</h2>
           <button 
             onClick={() => onNavigateFolder(null)}
             className="text-xs font-bold text-blue-400 hover:underline flex items-center gap-1 transition-all"
           >
-            VER TODO
+            {t('viewAll')}
           </button>
         </div>
         
@@ -94,7 +138,7 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
             <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-slate-400 group-hover:bg-white/10 group-hover:text-white transition-all">
               <Plus size={24} />
             </div>
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">NUEVA</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{t('new')}</p>
           </button>
 
           {rootFolders.map((folder) => (
@@ -109,7 +153,7 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
               <div className="text-left w-full">
                 <p className="text-sm font-semibold text-white truncate">{folder.name}</p>
                 <p className="text-slate-500 text-[10px] font-bold mt-1 tracking-widest uppercase">
-                  {files.filter(f => f.parentId === folder.id).length} ITEMS
+                  {files.filter(f => f.parentId === folder.id).length} {t('items')}
                 </p>
               </div>
             </button>
@@ -120,20 +164,20 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Crear Carpeta"
+        title={t('createFolder')}
         footer={(
           <div className="flex gap-4 w-full">
             <button 
               onClick={() => setIsModalOpen(false)}
               className="flex-1 glass-button py-4 rounded-2xl text-sm font-bold text-slate-400"
             >
-              CANCELAR
+              {t('cancel')}
             </button>
             <button 
               onClick={handleCreate}
               className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-2xl text-sm font-bold shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
             >
-              CREAR
+              {t('create')}
             </button>
           </div>
         )}
@@ -141,7 +185,7 @@ export default function HomeView({ files, onNavigateCategory, onNavigateFolder, 
         <input 
           autoFocus
           type="text" 
-          placeholder="Nombre de la carpeta..."
+          placeholder={t('placeholder')}
           value={newFolderName}
           onChange={(e) => setNewFolderName(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}

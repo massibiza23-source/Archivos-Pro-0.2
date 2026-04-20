@@ -6,7 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Home, FolderSearch, Search, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { FileNode, FileType } from './types';
+import { FileNode, FileType, AppSettings } from './types';
 import { storage, generateId, getMimeCategory } from './lib/storage';
 import { cn } from './lib/utils';
 
@@ -14,6 +14,7 @@ import { cn } from './lib/utils';
 import HomeView from './views/Home';
 import ExplorerView from './views/Explorer';
 import CategoryView from './views/CategoryView';
+import SettingsView from './views/Settings';
 
 type ViewType = 'home' | 'explorer' | 'category' | 'search' | 'settings';
 
@@ -23,6 +24,19 @@ export default function App() {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<FileType | null>(null);
   const [clipboard, setClipboard] = useState<{ nodes: FileNode[]; type: 'copy' | 'cut' } | null>(null);
+  
+  const [settings, setSettings] = useState<AppSettings>(() => {
+    const saved = localStorage.getItem('archivopro_settings');
+    return saved ? JSON.parse(saved) : { theme: 'midnight', textSize: 'medium', language: 'es' };
+  });
+
+  // Apply settings to document
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', settings.theme);
+    root.setAttribute('data-text-size', settings.textSize);
+    localStorage.setItem('archivopro_settings', JSON.stringify(settings));
+  }, [settings]);
 
   // Load files on mount
   useEffect(() => {
@@ -184,7 +198,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative h-screen w-full flex flex-col overflow-hidden bg-slate-950">
+    <div className="relative h-screen w-full flex flex-col overflow-hidden">
       <div className="bg-mesh" />
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-32">
@@ -196,6 +210,7 @@ export default function App() {
               onNavigateCategory={navigateToCategory}
               onNavigateFolder={navigateToFolder}
               onCreateFolder={handleCreateFolder}
+              language={settings.language}
             />
           )}
           {activeView === 'explorer' && (
@@ -229,7 +244,13 @@ export default function App() {
               clipboard={clipboard}
             />
           )}
-          {(activeView === 'search' || activeView === 'settings') && (
+          {activeView === 'settings' && (
+            <SettingsView 
+              settings={settings}
+              onUpdateSettings={setSettings}
+            />
+          )}
+          {activeView === 'search' && (
             <motion.div 
               key={activeView}
               initial={{ opacity: 0, scale: 0.9 }}
@@ -238,7 +259,7 @@ export default function App() {
               className="p-12 flex flex-col items-center justify-center h-full opacity-30 text-center gap-6"
             >
               <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center text-slate-400">
-                {activeView === 'search' ? <Search size={40} /> : <Settings size={40} />}
+                <Search size={40} />
               </div>
               <div>
                 <p className="text-xl font-bold tracking-tight text-white uppercase">En Desarrollo</p>
@@ -250,21 +271,22 @@ export default function App() {
       </main>
 
       {/* Bottom Nav */}
-      <nav className="fixed bottom-0 inset-x-0 h-28 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none z-50 flex items-end justify-center pb-8 px-6">
+      <nav className="fixed bottom-0 inset-x-0 h-28 theme-gradient-bottom pointer-events-none z-50 flex items-end justify-center pb-8 px-6">
         <div className="w-full max-w-lg bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[32px] p-2 pointer-events-auto flex items-center justify-around shadow-2xl">
           {[
-            { id: 'home', icon: Home, label: 'INICIO' },
-            { id: 'explorer', icon: FolderSearch, label: 'ARCHIVOS' },
-            { id: 'search', icon: Search, label: 'BUSCAR' },
-            { id: 'settings', icon: Settings, label: 'AJUSTES' },
+            { id: 'home', icon: Home, label: settings.language === 'es' ? 'INICIO' : 'HOME' },
+            { id: 'explorer', icon: FolderSearch, label: settings.language === 'es' ? 'ARCHIVOS' : 'FILES' },
+            { id: 'search', icon: Search, label: settings.language === 'es' ? 'BUSCAR' : 'SEARCH' },
+            { id: 'settings', icon: Settings, label: settings.language === 'es' ? 'AJUSTES' : 'SETTINGS' },
           ].map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveView(item.id as ViewType)}
               className={cn(
                 "flex flex-col items-center gap-1.5 p-3 px-5 rounded-[24px] transition-all relative overflow-hidden active:scale-90",
-                activeView === item.id ? "text-blue-400" : "text-slate-400 hover:text-slate-200"
+                activeView === item.id ? "" : "text-slate-400 hover:text-slate-200"
               )}
+              style={activeView === item.id ? { color: 'var(--accent)' } : {}}
             >
               <item.icon size={22} strokeWidth={activeView === item.id ? 2.5 : 2} />
               <span className={cn(

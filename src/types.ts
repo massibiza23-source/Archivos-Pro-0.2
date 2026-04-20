@@ -1,3 +1,9 @@
+export interface AppSettings {
+  theme: 'midnight' | 'forest' | 'ocean' | 'rose';
+  textSize: 'small' | 'medium' | 'large';
+  language: 'es' | 'en';
+}
+
 export type FileType = 'image' | 'video' | 'audio' | 'document' | 'folder';
 
 export interface FileNode {
