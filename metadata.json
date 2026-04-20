@@ -1,6 +1,6 @@
 {
-  "name": "ArchivoPro 0.2",
-  "description": "Gestor de archivos privado con navegación por carpetas y organización temática.",
+  "name": "ArchivoPro",
+  "description": "Gestor de archivos privado con soporte PWA, navegación por carpetas y organización temática.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

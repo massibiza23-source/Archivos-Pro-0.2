@@ -18,11 +18,20 @@ export const storage = {
   },
 
   async saveFileData(id: string, data: Blob) {
-    await set(id, data);
+    try {
+      await set(id, data);
+    } catch (err) {
+      console.error('Error saving file to IDB:', err);
+      throw new Error('No se pudo guardar el archivo. Puede que el almacenamiento esté lleno o bloqueado.');
+    }
   },
 
   async deleteFileData(id: string) {
-    await del(id);
+    try {
+      await del(id);
+    } catch (err) {
+      console.error('Error deleting file from IDB:', err);
+    }
   }
 };
 

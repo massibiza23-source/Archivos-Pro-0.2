@@ -128,19 +128,23 @@ export default function ExplorerView({
     const itemsToImport: { type: 'file' | 'folder'; name: string; file?: File; path: string }[] = [];
     const seenPaths = new Set<string>();
 
-    const filesArray = Array.from(importedFiles) as (File & { webkitRelativePath: string })[];
+    const filesArray = Array.from(importedFiles) as (File & { webkitRelativePath?: string })[];
 
     for (const file of filesArray) {
-      const path = file.webkitRelativePath;
+      // webkitRelativePath is available when webkitdirectory is supported and used.
+      // Fallback to filename if not available (handles multi-file selection as a flat list)
+      const path = file.webkitRelativePath || file.name;
       const parts = path.split('/');
       
       // Add all parent folders to the import list if not already seen
       let currentPath = '';
-      for (let i = 0; i < parts.length - 1; i++) {
-        currentPath = currentPath ? `${currentPath}/${parts[i]}` : parts[i];
-        if (!seenPaths.has(currentPath)) {
-          itemsToImport.push({ type: 'folder', name: parts[i], path: currentPath });
-          seenPaths.add(currentPath);
+      if (parts.length > 1) {
+        for (let i = 0; i < parts.length - 1; i++) {
+          currentPath = currentPath ? `${currentPath}/${parts[i]}` : parts[i];
+          if (!seenPaths.has(currentPath)) {
+            itemsToImport.push({ type: 'folder', name: parts[i], path: currentPath });
+            seenPaths.add(currentPath);
+          }
         }
       }
 
@@ -150,6 +154,8 @@ export default function ExplorerView({
 
     onBatchImport(itemsToImport);
     setIsNewContentSheetOpen(false);
+    // Reset input value so same folder can be re-imported if needed
+    e.target.value = '';
   };
 
   return (
@@ -227,9 +233,8 @@ export default function ExplorerView({
         />
         <input 
           type="file" 
-          // @ts-ignore
-          webkitdirectory=""
-          directory=""
+          multiple
+          {...{ webkitdirectory: "", directory: "" }}
           hidden 
           ref={folderInputRef} 
           onChange={handleFolderImport} 

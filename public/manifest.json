@@ -1,0 +1,24 @@
+{
+  "short_name": "ArchivoPro",
+  "name": "ArchivoPro: Gestor de Archivos",
+  "description": "Gestor de archivos privado con organización temática.",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#2563eb",
+  "orientation": "portrait"
+}
